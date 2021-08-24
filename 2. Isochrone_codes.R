@@ -71,6 +71,8 @@ acs_state = function(state_code){
   print("acs_data_downloaded")
   acs_data <- select(acs_data, -moe)
   acs_data1 <- spread(acs_data, key = variable, value = estimate)
+  
+  #Estimating percentages
   acs_data1$p_n_whi = ((1- acs_data1$white)/acs_data1$tot_pop)*100
   acs_data1$p_his = (acs_data1$hispanic/acs_data1$tot_pop)*100
   acs_data1$p_hs = (acs_data1$high_school/acs_data1$pop_over25)*100
@@ -85,7 +87,7 @@ acs_state = function(state_code){
 }
 
 
-#### determine study area ####
+#### Determine study area ####
 study_area = function(acs_state_area, gtfs_city_date, shapefile_name){
   #stop = read.csv(paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,"./stops.txt",sep=""),
   #                stringsAsFactors = FALSE)
@@ -132,8 +134,8 @@ iso <- function(poi, Date, Time, Cutoff, Date_str, poi_type, city, type, exclude
         mode = "WALK, TRANSIT", # modes we want the route planner to use
         bannedRoutes = excluded_routes, #exclude the routes except light rail, subway, bus, cable tram
         maxWalkDistance = 800, #half mile (approx 10min walk)
-        maxTransfers = 1,
-        minTransferTime = 300, #5 min
+        maxTransfers = 1, #maximum allowable number of transfers 1
+        minTransferTime = 300, # minimum transfer time 5 minutes
         date = Date,
         time= Time,
         cutoffSec = Cutoff
@@ -333,7 +335,7 @@ slc_study_area = study_area(acs_UT, "gtfs_UTA_slc/gtfs_7_january",
 
 
 
-##### isochrones calculation ######
+##### Isochrones calculation ######
 
 #### isochrones for columbus ####
 transfer = read.csv("D:/Accessibility_study/gtfs_data/gtfs_COTA_columbus/gtfs_6_december/transfers.txt")
@@ -629,7 +631,7 @@ for (i in comb){iso(poi_nonurgent, "1/7/2020", i[[1]], i[[2]], "Jan07", "health"
 
 
 
-#### Shapefile post-processing####
+#### Shapefile post-processing ####
 #### edit geojson 
 names = list.files("D:/Accessibility_study/Final isochrones1/health/health_covid_1800_midday",
                    pattern = ".geojson", include.dirs = FALSE)
