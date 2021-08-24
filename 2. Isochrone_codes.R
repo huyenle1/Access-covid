@@ -39,31 +39,32 @@ library(tidytransit)
 #java -Xmx2G -jar otp.jar --router current --graphs graphs --server
 
 
-# getting census data
+####### getting census data ########
 census_api_key("0374af53cfe8d2728204af53395977de1b54b17d")
 
 # variable serach
 v18 <- load_variables(2018, "acs5", cache = TRUE)
 
+### function to extract blockgroup-level ACS data for each state
 acs_state = function(state_code){
   acs_data = get_acs(geography = "block group",
           state = state_code,
           #county = "Franklin County",
-          variables = c(tot_pop = "B01003_001",
-                        pop_over25 = "B15003_001",
-                        white = "B02001_002",
-                        hispanic = "B03002_012",
-                        high_school = "B15003_018",
-                        med_inc = "B19013_001",
-                        poverty = "B17017_002",
-                        no_ins_under19 = "B27010_017",
-                        no_ins_19_34 = "B27010_033",
-                        no_ins_35_64 = "B27010_050",
-                        no_ins_over64 = "B27010_066",
-                        HH_size = "B11001_001",
-                        owner_no_veh = "B25044_003",
-                        renter_no_veh = "B25044_010",
-                        house_own = "B25003_002"),
+          variables = c(tot_pop = "B01003_001", #total population
+                        pop_over25 = "B15003_001", #population over age 25
+                        white = "B02001_002", #total white population
+                        hispanic = "B03002_012", #total hispanic population
+                        high_school = "B15003_018", #total population with a high school degree
+                        med_inc = "B19013_001", #median income
+                        poverty = "B17017_002", #total households living below poverty level
+                        no_ins_under19 = "B27010_017", #population group under 19 with no medical insurance
+                        no_ins_19_34 = "B27010_033", #population group within age 19-34 with no medical insurance
+                        no_ins_35_64 = "B27010_050", #population group within age 35-64 with no medical insurance
+                        no_ins_over64 = "B27010_066", #population group over 64 with no medical insurance
+                        HH_size = "B11001_001", #total number of households
+                        owner_no_veh = "B25044_003", #households with no vehicle (owners of the housing unit)
+                        renter_no_veh = "B25044_010", #households with no vehicle (renters of the housing unit)
+                        house_own = "B25003_002"), #housing units occupied by owners
           year = 2018,
           survey = "acs5",
           geometry = TRUE)
@@ -91,6 +92,8 @@ study_area = function(acs_state_area, gtfs_city_date, shapefile_name){
   file = paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,".zip",sep="")
   gtfs = read_gtfs(file, quiet = TRUE)
   select_service_id <- gtfs$calendar %>% pull(service_id)
+  
+  #route type (0: light rail, 1:subway, 3:bus, 5: cable tram)
   select_route_id <- filter(gtfs$routes, route_type == 0|route_type == 1|route_type == 3|route_type == 5) %>% pull(route_id)
   stop <- filter_stops(gtfs, select_service_id, select_route_id)
   sf_stop = st_as_sf(stop, coords = c("stop_lon", "stop_lat"), 
@@ -102,6 +105,8 @@ study_area = function(acs_state_area, gtfs_city_date, shapefile_name){
   st_write(sf_stop_prj, dsn = paste("D:/Accessibility_study/Shapefiles1/",shapefile_name,"_stop.shp",sep=""),
            driver = "ESRI Shapefile")
   print("exported stop data to shapefiles")
+  
+  #half mile buffer around each stop
   stop_area = st_buffer(sf_stop_prj, 805) %>%
     st_union() #half mile (approx 10min walk)
   area = acs_state_area%>%
@@ -113,7 +118,7 @@ study_area = function(acs_state_area, gtfs_city_date, shapefile_name){
 }
 
 
-### isochrones for point of interests 
+#### isochrones for point of interests 
 iso <- function(poi, Date, Time, Cutoff, Date_str, poi_type, city, type, excluded_routes) {
   Total = nrow(poi)
   for (i in 1:Total) {
@@ -125,7 +130,7 @@ iso <- function(poi, Date, Time, Cutoff, Date_str, poi_type, city, type, exclude
         toPlace = poi[i, ]$latlong,
         arriveBy = TRUE,
         mode = "WALK, TRANSIT", # modes we want the route planner to use
-        bannedRoutes = excluded_routes,
+        bannedRoutes = excluded_routes, #exclude the routes except light rail, subway, bus, cable tram
         maxWalkDistance = 800, #half mile (approx 10min walk)
         maxTransfers = 1,
         minTransferTime = 300, #5 min
@@ -151,7 +156,7 @@ iso <- function(poi, Date, Time, Cutoff, Date_str, poi_type, city, type, exclude
   write(sf_geojson(p1), file = paste("D:/Accessibility_study/isochrones_by_cities/EPSG 5070/", city, "/", type, "/", poi_type,"_", Date_str,"_", Time, "_", Cutoff, ".geojson", sep = ""))
 }
 
-
+#### Function to check available route types for each city
 check_route_type <- function(gtfs_city_date) {
   zipF<- paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,".zip",sep="")
   outDir<-paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date, sep="")
@@ -162,6 +167,8 @@ check_route_type <- function(gtfs_city_date) {
   route2 = route1[complete.cases(route1$route_type),]
   write.csv(route2, paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,"/routes.txt",sep=""))
 }
+
+### Function to exclude the routes except light rail, subway, bus, cable tram
 get_excluded_routes <- function(gtfs_city_date){
   file = paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,".zip",sep="")
   gtfs = read_gtfs(file, quiet = TRUE)
@@ -181,6 +188,8 @@ get_excluded_routes <- function(gtfs_city_date){
   #filtered_stops_df <- filter_stops(gtfs, select_service_id, select_route_id)
   return(excluded_routes)
 }
+
+### Function to identify stops for selected route types
 get_stops <- function(gtfs_city_date){
   file = paste("D:/Accessibility_study/gtfs_data/",gtfs_city_date,".zip",sep="")
   gtfs = read_gtfs(file, quiet = TRUE)
@@ -190,7 +199,7 @@ get_stops <- function(gtfs_city_date){
   return(filtered_stops_df)
 }
 
-
+### list of sample times for measuring isochrones
 comb = list(list("9.00 am", 1800), list("9.10 am", 1800),
             list("9.20 am", 1800), list("9.30 am", 1800),
             list("9.40 am", 1800), list("9.50 am", 1800),
@@ -324,7 +333,7 @@ slc_study_area = study_area(acs_UT, "gtfs_UTA_slc/gtfs_7_january",
 
 
 
-##### isochrones ######
+##### isochrones calculation ######
 
 #### isochrones for columbus ####
 transfer = read.csv("D:/Accessibility_study/gtfs_data/gtfs_COTA_columbus/gtfs_6_december/transfers.txt")
@@ -618,7 +627,10 @@ for (i in comb){iso(poi_nonurgent, "1/7/2020", i[[1]], i[[2]], "Jan07", "health"
 
 
 
-#### edit geojson #####
+
+
+#### Shapefile post-processing####
+#### edit geojson 
 names = list.files("D:/Accessibility_study/Final isochrones1/health/health_covid_1800_midday",
                    pattern = ".geojson", include.dirs = FALSE)
 for (i in names){
