@@ -1,13 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 #code collected and modified from: https://gis.stackexchange.com/questions/68359/creating-average-polygon
 
-
-# In[1]:
 
 
 import rasterio
@@ -19,18 +11,13 @@ from math import floor, ceil, sqrt
 import os
 
 
-# In[2]:
-
 
 import geopandas as gp
 import pandas as pd
 import json
 
 
-# # Average polygons 
-
-# In[3]:
-
+## Average polygon functions
 
 def average_polygon(shapes, path):  
     max_shape = cascaded_union([shape(s) for s in shapes])
@@ -67,7 +54,6 @@ def average_polygon(shapes, path):
       json.dump(mapping(simp_poly), outfile)
 
 
-# In[4]:
 
 
 def read_shapes(filename):
@@ -85,9 +71,7 @@ def write_shapes(infile, outfile):
             json.dump(a, outfile)
 
 
-# In[5]:
-
-
+## Functions for shapefiles generation, categorizations, and storing
 def categorize_file(filename, date):
     filename_category = [[],[],[],[],[],[],[],[],[],[],[],[]]
     for i in filename:
@@ -117,8 +101,6 @@ def categorize_file(filename, date):
             filename_category[11].append(i)
     return filename_category
 
-
-# In[6]:
 
 
 def categorize_file_health(filename, date):
@@ -151,8 +133,6 @@ def categorize_file_health(filename, date):
     return filename_category
 
 
-# In[7]:
-
 
 def avg_polygon_to_shapefile_health_urgent(path_name, date_list):
     path = os.chdir(r'D:\Accessibility_study\isochrones_by_cities\EPSG 5070\%s\health_urgent'%path_name)
@@ -175,8 +155,6 @@ def avg_polygon_to_shapefile_health_urgent(path_name, date_list):
         average_polygon(shapes[i], r'D:\Accessibility_study\isochrones_by_cities\EPSG 5070\%s\health_%s_urgent.geojson'%(path_name,names[i]))
         print(i, "done")
 
-
-# In[8]:
 
 
 def avg_polygon_to_shapefile_health_nonurgent(path_name, date_list):
@@ -201,8 +179,6 @@ def avg_polygon_to_shapefile_health_nonurgent(path_name, date_list):
         print(i, "done")
 
 
-# In[9]:
-
 
 def avg_polygon_to_shapefile_grocery(path_name, date_list):
     path = os.chdir(r'D:\Accessibility_study\isochrones_by_cities\EPSG 5070\%s\grocery'%path_name)
@@ -225,8 +201,6 @@ def avg_polygon_to_shapefile_grocery(path_name, date_list):
         average_polygon(shapes[i], r'D:\Accessibility_study\isochrones_by_cities\EPSG 5070\%s\grocery_%s.geojson'%(path_name,names[i]))
         print(i, "done")
 
-
-# In[10]:
 
 
 def store_file_health_nonurgent(path_name, date, city_name):
@@ -292,8 +266,6 @@ def store_file_health_nonurgent(path_name, date, city_name):
     print (precovid, covid, postcovid)
 
 
-# In[11]:
-
 
 def store_file_health_urgent(path_name, date, city_name):
     path = os.chdir(r'D:\Accessibility_study\isochrones_by_cities\EPSG 5070\%s'%path_name)
@@ -357,8 +329,6 @@ def store_file_health_urgent(path_name, date, city_name):
             write_shapes(infile,outfile4)
     print (precovid, covid, postcovid)
 
-
-# In[12]:
 
 
 def store_file_grocery(path_name, date, city_name):
@@ -424,10 +394,7 @@ def store_file_grocery(path_name, date, city_name):
     print (precovid, covid, postcovid)
 
 
-# Estimating average polygons for groceries
-
-# In[15]:
-
+## Estimating average polygons for groceries
 
 louisville_grocery = avg_polygon_to_shapefile_grocery("isochrones_louisville", ["Jan28","Mar31", "Nov17"])
 nashville_grocery = avg_polygon_to_shapefile_grocery("isochrones_nashville", ["Jan28","Apr07", "Nov24"])
@@ -453,10 +420,7 @@ boston_grocery = avg_polygon_to_shapefile_grocery("isochrones_boston", ["Jan07",
 slc_grocery = avg_polygon_to_shapefile_grocery("isochrones_slc", ["Jan14","Apr28", "Nov24"])
 
 
-# Estimating average polygon for urgent health
-
-# In[12]:
-
+## Estimating average polygon for urgent health
 
 columbus_health = avg_polygon_to_shapefile_health_urgent("isochrones_columbus", ["Jan07","May05", "Dec08"])
 philadelphia_health = avg_polygon_to_shapefile_health_urgent("isochrones_philadelphia", ["Jan28","Apr14", "Nov17"])
@@ -482,10 +446,7 @@ madison_health = avg_polygon_to_shapefile_health_urgent("isochrones_madison", ["
 nyc_health = avg_polygon_to_shapefile_health_urgent("isochrones_nyc", ["Jan07","May05", "Dec08"])
 
 
-# Estimating average polygon for non-urgent health
-
-# In[31]:
-
+## Estimating average polygon for non-urgent health
 
 annarbor_health = avg_polygon_to_shapefile_health_nonurgent("isochrones_annarbor", ["Jan28","Mar31", "Nov17"])
 atlanta_health = avg_polygon_to_shapefile_health_nonurgent("isochrones_atlanta", ["Jan07","Apr28", "Dec08"])
@@ -509,10 +470,7 @@ madison_health = avg_polygon_to_shapefile_health_nonurgent("isochrones_madison",
 champaign_health = avg_polygon_to_shapefile_health_nonurgent("isochrones_champaign", ["Jan07","May12", "Nov24"])
 
 
-# File categorizations
-
-# In[15]:
-
+## File categorizations
 
 store_file_health_urgent('isochrones_austin', ["Jan07","Mar31", "Dec01"], 'Austin')
 store_file_health_urgent("isochrones_chicago", ["Jan07","Apr21", "Nov24"], 'Chicago')
@@ -537,8 +495,6 @@ store_file_health_urgent("isochrones_slc", ["Jan14","Apr28", "Nov24"], 'SLC')
 store_file_health_urgent("isochrones_miami", ["Feb25","Apr28", "Nov03"], 'Miami')
 store_file_health_urgent("isochrones_dallas", ["Jan07","Apr07", "Dec08"], 'Dallas')
 
-
-# In[40]:
 
 
 store_file_health_nonurgent('isochrones_austin', ["Jan07","Mar31", "Dec01"], 'Austin')
@@ -565,7 +521,6 @@ store_file_health_nonurgent("isochrones_miami", ["Feb25","Apr28", "Nov03"], 'Mia
 store_file_health_nonurgent("isochrones_dallas", ["Jan07","Apr07", "Dec08"], 'Dallas')
 
 
-# In[15]:
 
 
 store_file_grocery('isochrones_austin', ["Jan07","Mar31", "Dec01"], 'Austin')
@@ -592,46 +547,21 @@ store_file_grocery("isochrones_miami", ["Feb25","Apr28", "Nov03"], 'Miami')
 store_file_grocery("isochrones_dallas", ["Jan07","Apr07", "Dec08"], 'Dallas')
 
 
-# # SLD database
-
-# In[20]:
-
-
+## SLD database
 bg = gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles\study_area1.shp')
-
-
-# In[21]:
-
-
 bg.columns
 bg.sort_values("GEOID", inplace = True) 
 bg.drop_duplicates(subset ="GEOID", keep = "first", inplace = True) 
 
 
-# In[22]:
-
-
 SLD = gp.read_file(r'D:\econ_analysis\SmartLocationDb\SmartLocationDb.gdb', driver="FileGDB")
-
-
-# In[ ]:
-
-
 SLD1 = SLD[['GEOID10','D1C', 'D1D', 'WORKERS','R_LOWWAGEWK','R_PCTLOWWAGE', 'D3a', 'D3amm', 'D3bmm4']].rename(columns = {
     'D1C': 'job_den','D1D': 'act_den','WORKERS':'tot_work', 
     'R_LOWWAGEWK':'low_inc_work','R_PCTLOWWAGE':'p_low_inc',
     'D3a':'road_dens','D3amm': 'mm_road_den','D3bmm4': 'int_den'})
 
 
-# In[19]:
-
-
 blg = pd.merge(bg, SLD1, left_on = 'GEOID', right_on = 'GEOID10', how = "left")
-
-
-# In[21]:
-
-
 blg['Area_sqm'] = list(blg['geometry'].area)
 #blg['Area_acre'] = blg['Area_sqm'] * 0.00024711
 #blg['Area_sqmi'] = blg['Area_sqm'] * 3.861E-07
@@ -642,23 +572,13 @@ blg['Area_sqm'] = list(blg['geometry'].area)
 #blg['int_road'] = blg['int_den'] * blg['Area_sqmi']
 
 
-# In[22]:
-
 
 gdf = gp.GeoDataFrame(blg, geometry = 'geometry')
 gdf.to_file(r'D:\Accessibility_study\Final isochrones1\shapefiles\study_area_edited.shp', driver = 'ESRI Shapefile')
 
 
-# # Joining isochrones to blg
-
-# In[100]:
-
-
+## Joining isochrones to blg
 blg = gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Original shapefiles\study_area_edited.shp')
-
-
-# In[116]:
-
 
 shp0=gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Differences\health_u_diff13_2700_morning.shp')
 shp1=gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Original shapefiles_segmented\health_u_postcovid_2700_morning_m.shp')
@@ -666,19 +586,11 @@ shp1=gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Orig
 shp0['Access'] = [0 for i in range(len(shp0))]
 shp1['Access'] = [1 for i in range(len(shp1))]
 
-
-# In[117]:
-
-
 shp1 = shp1[['layer', 'Access', 'geometry']]
 shp0 = shp0[['layer', 'Access', 'geometry']]
 
 shp = pd.concat([shp0, shp1])
 shp['ID'] = [i for i in range(len(shp))]
-
-
-# In[118]:
-
 
 shp_bg = gp.overlay(shp, blg, how='intersection')
 shp_bg['shp_sqm'] = list(shp_bg['geometry'].area)
@@ -686,26 +598,11 @@ shp_bg['ratio'] = shp_bg['shp_sqm'] /shp_bg['Area_sqm']
 shp_bg = shp_bg.sort_values(by = "ID")
 
 
-# In[119]:
-
-
 shp_bg1 = shp_bg[shp_bg['ratio'] >=0.3]
-
-
-# In[120]:
-
-
-len(shp_bg1)
-
-
-# In[121]:
 
 
 #difference in isochrones in percentage
 (sum(shp_bg1['shp_sqm'])/sum(shp_bg['shp_sqm']))
-
-
-# In[122]:
 
 
 #dataframe with no duplicate
@@ -717,45 +614,22 @@ dat4 = dat3.drop_duplicates(subset = "GEOID", keep = False)
 
 shp_bg1 = pd.concat ([dat1, dat4])
 
-
-# In[123]:
-
-
 blg_list = list(shp_bg1['GEOID'].unique())
 shp_bg2 = blg[blg['GEOID'].isin(blg_list)]
 
-
-# In[124]:
-
-
 shp_bg2.columns
-
-
-# In[125]:
-
 
 dat5 = shp_bg1[['GEOID', 'Access']]
 shp_bg3 = pd.merge(dat5, shp_bg2, on = 'GEOID')
 
-
-# In[126]:
-
-
 gdf = gp.GeoDataFrame(shp_bg1, geometry = 'geometry')
 gdf.to_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Final aggregated layers\health_2700_morning_isochrones13_u.shp', driver = 'ESRI Shapefile')
-
-
-# In[127]:
-
 
 gdf = gp.GeoDataFrame(shp_bg3, geometry = 'geometry')
 gdf.to_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Final aggregated layers\health_2700_morning_blg13_u.shp', driver = 'ESRI Shapefile')
 
 
-# # Datasets and summary tables
-
-# In[130]:
-
+## Datasets and summary tables
 
 dat1 = gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Final aggregated layers\health_2700_morning_isochrones12_u.shp')
 dat2 = gp.read_file(r'D:\Accessibility_study\Final isochrones1\shapefiles_new\Final aggregated layers\health_2700_morning_isochrones13_u.shp')
@@ -771,29 +645,11 @@ dat_1800 = pd.concat([dat1, dat2])
 dat_1800['pop_den'] = dat_1800['tot_pop']/(dat_1800['Area_sqm']*0.00024711)
 dat_1800['Facility'] = 'Health_urgent'
 
-
-# In[132]:
-
-
 layer_1800 = list(dat_1800['layer_1'].unique())
 City_1800 = [i[:(len(i)-33)] for i in layer_1800] 
 City_1800
 
-
-# In[133]:
-
-
 layer_1800 = list(dat_1800['layer_1'].unique())
-
-'''City_1800 = ['Ann Arbor','Atlanta','Boston','Champaign','Chicago','Columbus',
-       'Dallas','Denver', 'Los Angeles','Louisville','Madison','Miami','Nashville','New York City',
-       'Philadelphia','Phoenix','Portland', 'San Francisco','San Jose','Seattle', 'Salt Lake City',
-       'Ann Arbor','Atlanta','Austin','Boston','Champaign','Chicago','Columbus',
-       'Dallas','Denver', 'Los Angeles','Louisville','Madison','Miami','Nashville','New York City',
-       'Philadelphia','Phoenix','Portland', 'San Francisco','San Jose','Seattle', 'Salt Lake City',
-       'Ann Arbor','Atlanta','Austin','Boston','Champaign','Chicago','Columbus',
-       'Dallas','Denver', 'Los Angeles','Louisville','Madison','Miami','Nashville','New York City',
-       'Philadelphia','Phoenix','Portland', 'San Francisco','San Jose','Seattle', 'Salt Lake City']'''
 City_1800 = [i[:(len(i)-33)] for i in layer_1800] 
 
 dat_1800['City'] = dat_1800['layer_1'].replace(layer_1800,City_1800)
@@ -809,17 +665,10 @@ dat1_1800 = dat_1800[['layer_1', 'City','Access', 'ID', 'GEOID', 'NAME', 'HH_siz
                       'job_den', 'act_den','p_low_inc', 'road_dens', 'mm_road_de',
                       'int_den', 'area_type','Area_sqm', 'shp_sqm', 'ratio', 'Time', 'Iso', 'Facility','Diff']]
 
-
-# In[134]:
-
-
 summary_1800 = dat1_1800.groupby(["City", "Access", 'Diff']).agg(["mean", "median", "std", "sum"]).reset_index()
 
-
 dat2_1800 = pd.concat([dat1_1800, pd.get_dummies(dat1_1800['area_type'])], axis=1)
-
 dat3_1800 = pd.concat([dat2_1800, pd.get_dummies(dat2_1800['City'])], axis=1)
-
 dat3_1800.to_csv(r'D:\Accessibility_study\Final isochrones1\Summary\health_2700_morning_u.csv')
 summary_1800.to_csv(r'D:\Accessibility_study\Final isochrones1\Summary\health_summary_2700_morning_u.csv')
 
