@@ -1,4 +1,3 @@
-#https://stackoverflow.com/questions/41384075/r-calculate-and-interpret-odds-ratio-in-logistic-regression
 library(dplyr)
 library(lme4)
 library(gtable)
